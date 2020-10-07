@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net"
 	"zinx/izface"
+	"zinx/utils"
 )
 
 type Server struct {
@@ -37,7 +38,14 @@ func (s *Server) AddRouter(router izface.IRouter) {
 }*/
 
 func (s *Server) Start() {
-	fmt.Printf("start server : %s at %s:%s\n", s.Name, s.IP, s.port)
+	fmt.Printf("[Zinx] server name is : %s, listenner at Ip:%s:%s",
+		utils.GlobalObject.Name,
+		utils.GlobalObject.Host,
+		utils.GlobalObject.TcpPort)
+
+	fmt.Printf("[Zinx] Version is %s, MaxPackageSize is %d, MaxConnNum is %d",
+		utils.GlobalObject.Version, utils.GlobalObject.MaxPackageSize,
+		utils.GlobalObject.MaxConn)
 
 	go func() {
 
@@ -87,10 +95,10 @@ func (s *Server) Server() {
 
 func NewZinxServer(name string) izface.IServer {
 	return &Server{
-		Name: name,
-		IP:        "127.0.0.1",
+		Name: utils.GlobalObject.Name,
+		IP:        utils.GlobalObject.Host,
 		IPVersion: "tcp4",
-		port:      "8999",
+		port:      utils.GlobalObject.TcpPort,
 		Router: nil,
 	}
 }

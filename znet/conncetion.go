@@ -1,7 +1,9 @@
 package znet
 
 import (
+	"errors"
 	"fmt"
+	"io"
 	"net"
 	"zinx/izface"
 )
@@ -27,21 +29,52 @@ func (c *Connection) StartReader() {
 	defer c.Stop()
 
 	for {
-		buf := make([]byte, 512)
+		/*buf := make([]byte, utils.GlobalObject.MaxPackageSize)
 		_, err := c.Connection.Read(buf)
 		if err != nil {
 			fmt.Println("recv buf err ", err)
 			continue
-		}
+		}*/
 
 		/*if err := c.HandleAPI(c.Connection, buf, cnt); err != nil {
 			fmt.Println("connid ", c.ConnectionID, "handler error", err)
 			break
 		}*/
 
+		dp := NewDadaPack()
+
+		headData := make([]byte, dp.GetHeadLen())
+		if _, err :=  io.ReadFull(c.GetTCPConnection(), headData); err != nil {
+			fmt.Println("read msg head err", err)
+			break
+		}
+
+		msg,  err := dp.UnPack(headData)
+		if err != nil {
+			fmt.Println("unpack err ", err)
+			break
+		}
+
+		var data []byte
+		if msg.GetMessageLen() > 0 {
+			data = make([]byte, msg.GetMessageLen())
+
+			if _, err := io.ReadFull(c.GetTCPConnection(), data); err != nil {
+				fmt.Println("read msg data err", err)
+				break
+			}
+		}
+		msg.SetMessageData(data)
+
+		//读取客户端的 msg 头 二进制流的前8个字节
+
+		//拆包，得到 msgId 和 msgDataLen, 放到 msg 消息中
+
+		//根据 dataLen , 再次读取Data, 放在 msgData中
+
 		req := Request{
 			Conn: c,
-			data: buf,
+			msg: msg,
 		}
 
 		go func(request izface.IRequest) {
@@ -52,6 +85,30 @@ func (c *Connection) StartReader() {
 
 
 	}
+}
+
+//把要发给客户端的消息先封包再发送
+func (c *Connection) SendMsg(messageID uint32, data []byte) error {
+
+	if c.isClose == true {
+		return errors.New("connection is close when send msg")
+	}
+
+	dp := NewDadaPack()
+
+	binMsg, err := dp.Pack(NewMsgPackage(messageID, data))
+	if err != nil {
+		fmt.Println("pack err msg id =", messageID)
+		return errors.New("pack error msg")
+	}
+
+	if _, err := c.Connection.Write(binMsg); err != nil {
+		fmt.Println("write msg id ", messageID, " is error")
+		return errors.New("conn write msg error")
+	}
+
+	return nil
+
 }
 
 func (c *Connection) Start() {
@@ -66,7 +123,7 @@ func (c *Connection) Start() {
 
 
 func (c *Connection) Stop() {
-	fmt.Println("coonID 为 %d 的连接正在关闭中......", c.ConnectionID)
+	fmt.Printf("coonID 为 %d 的连接正在关闭中......", c.ConnectionID)
 	if c.isClose == true {
 		return
 	}

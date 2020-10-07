@@ -6,7 +6,7 @@ type Request struct {
 
 	Conn izface.IConnection
 
-	data []byte
+	msg izface.Imessage
 
 }
 
@@ -15,5 +15,9 @@ func (r *Request) GetConnection() izface.IConnection {
 }
 
 func (r *Request) GetData() []byte {
-	return r.data
+	return r.msg.GetData()
+}
+
+func (r *Request) GetMsgID() uint32 {
+	return r.msg.GetMessageId()
 }

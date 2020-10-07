@@ -15,6 +15,8 @@ type IConnection interface {
 
 	RemoteAddr() net.Addr
 
+	SendMsg(msgID uint32, data []byte) error
+
 }
 
 type HandlerFunc func(*net.TCPConn, []byte, int) error
