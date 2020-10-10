@@ -45,13 +45,13 @@ func (c *Connection) StartReader() {
 
 		headData := make([]byte, dp.GetHeadLen())
 		if _, err :=  io.ReadFull(c.GetTCPConnection(), headData); err != nil {
-			fmt.Println("read msg head err", err)
+			fmt.Println("read msg head err\n", err)
 			break
 		}
 
 		msg,  err := dp.UnPack(headData)
 		if err != nil {
-			fmt.Println("unpack err ", err)
+			fmt.Println("unpack err \n", err)
 			break
 		}
 
