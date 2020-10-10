@@ -1,16 +1,16 @@
 package znet
 
-import "zinx/izface"
+import "zinx/ziface"
 
 type Request struct {
 
-	Conn izface.IConnection
+	Conn ziface.IConnection
 
-	msg izface.Imessage
+	msg ziface.Imessage
 
 }
 
-func (r *Request) GetConnection() izface.IConnection {
+func (r *Request) GetConnection() ziface.IConnection {
 	return r.Conn
 }
 

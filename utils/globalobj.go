@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"zinx/izface"
+	"zinx/ziface"
 )
 
 /**
@@ -14,7 +14,7 @@ import (
 type  GlobalObj struct {
 
 	//server
-	TcpServer izface.IServer
+	TcpServer ziface.IServer
 	Host string
 	TcpPort string
 	Name string
@@ -45,7 +45,7 @@ func init() {
 	//如果配置没有加载，这里设置默认的值
 	GlobalObject = &GlobalObj{
 		Name: "Zinx server app",
-		Version: "v0.5",
+		Version: "v0.6",
 		Host: "0.0.0.0",
 		TcpPort: "8999",
 		MaxConn: 1000,

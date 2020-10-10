@@ -3,7 +3,7 @@ package znet
 import (
 	"fmt"
 	"net"
-	"zinx/izface"
+	"zinx/ziface"
 	"zinx/utils"
 )
 
@@ -17,13 +17,12 @@ type Server struct {
 
 	port string
 
-	Router izface.IRouter
+    MsgHandler ziface.IMsgHandler
 
 }
 
-func (s *Server) AddRouter(router izface.IRouter) {
-
-	s.Router = router
+func (s *Server) AddRouter(msgID uint32, router ziface.IRouter) {
+	s.MsgHandler.AddRouter(msgID, router)
 	fmt.Println("add Router success")
 }
 
@@ -69,7 +68,7 @@ func (s *Server) Start() {
 				fmt.Println(err)
 				continue
 			}
-			dealConnection := NewConnection(conn, cid, s.Router)
+			dealConnection := NewConnection(conn, cid, s.MsgHandler)
 			cid ++
 			go dealConnection.Start()
 		}
@@ -93,12 +92,12 @@ func (s *Server) Server() {
 	select {}
 }
 
-func NewZinxServer(name string) izface.IServer {
+func NewZinxServer(name string) ziface.IServer {
 	return &Server{
 		Name: utils.GlobalObject.Name,
 		IP:        utils.GlobalObject.Host,
 		IPVersion: "tcp4",
 		port:      utils.GlobalObject.TcpPort,
-		Router: nil,
+		MsgHandler: newMsgHandler(),
 	}
 }

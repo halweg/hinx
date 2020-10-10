@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"zinx/izface"
+	"zinx/ziface"
 	"zinx/znet"
 )
 
@@ -10,7 +10,7 @@ type PingRouter struct {
 	znet.BaseRouter
 }
 
-func (pr *PingRouter) PreHandle(request izface.IRequest ) {
+func (pr *PingRouter) PreHandle(request ziface.IRequest ) {
 	fmt.Println("call router PreHandle......")
 	_, err := request.GetConnection().GetTCPConnection().Write([]byte("调用了PreHandle\n"))
 	if err != nil {
@@ -19,7 +19,7 @@ func (pr *PingRouter) PreHandle(request izface.IRequest ) {
 
 }
 
-func (pr *PingRouter) Handle(request izface.IRequest ) {
+func (pr *PingRouter) Handle(request ziface.IRequest ) {
 	fmt.Println("call router handle......")
 	_, err := request.GetConnection().GetTCPConnection().Write([]byte("调用了handle\n"))
 	if err != nil {
@@ -27,7 +27,7 @@ func (pr *PingRouter) Handle(request izface.IRequest ) {
 	}
 }
 
-func (pr *PingRouter) PostHandle(request izface.IRequest ) {
+func (pr *PingRouter) PostHandle(request ziface.IRequest ) {
 	fmt.Println("call router PostHandle......")
 	_, err := request.GetConnection().GetTCPConnection().Write([]byte("调用了PostHandle\n"))
 	if err != nil {

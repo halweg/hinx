@@ -1,4 +1,4 @@
-package izface
+package ziface
 
 import "net"
 

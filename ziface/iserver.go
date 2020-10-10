@@ -1,4 +1,4 @@
-package izface
+package ziface
 
 type IServer interface {
 	Start()
@@ -7,6 +7,6 @@ type IServer interface {
 
 	Server()
 
-	AddRouter(router IRouter)
+	AddRouter(msgID uint32, router IRouter)
 }
 

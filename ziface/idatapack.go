@@ -1,4 +1,4 @@
-package izface
+package ziface
 
 type IDataPack interface {
 	GetHeadLen() uint32

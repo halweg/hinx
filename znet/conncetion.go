@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"io"
 	"net"
-	"zinx/izface"
+	"zinx/ziface"
 )
 
 type Connection struct {
@@ -18,8 +18,9 @@ type Connection struct {
 
 	ExitChan chan bool
 
-	Router izface.IRouter
+	//Router ziface.IRouter
 
+	MsgHandler ziface.IMsgHandler
 }
 
 func (c *Connection) StartReader() {
@@ -76,12 +77,8 @@ func (c *Connection) StartReader() {
 			Conn: c,
 			msg: msg,
 		}
-
-		go func(request izface.IRequest) {
-			c.Router.PreHandle(request)
-			c.Router.Handle(request)
-			c.Router.PostHandle(request)
-		}(&req)
+		
+		go c.MsgHandler.DoMessageHandler(&req)
 
 
 	}
@@ -152,14 +149,14 @@ func (c *Connection) Send([]byte) error {
 	return nil
 }
 
-func NewConnection(connection *net.TCPConn, connectionID uint32, router izface.IRouter) *Connection {
+func NewConnection(connection *net.TCPConn, connectionID uint32,  handler ziface.IMsgHandler) *Connection {
 
 	c := &Connection{
 		Connection:   connection,
 		ConnectionID: connectionID,
 		isClose:      false,
 		ExitChan:     make(chan bool, 1),
-		Router: router,
+		MsgHandler:   handler,
 	}
 
 	return c

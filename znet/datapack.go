@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"encoding/binary"
 	"errors"
-	"zinx/izface"
+	"zinx/ziface"
 	"zinx/utils"
 )
 
@@ -24,7 +24,7 @@ func (dp *DataPack) GetHeadLen () uint32 {
 }
 
 
-func (dp *DataPack) Pack(msg izface.Imessage) ([]byte, error) {
+func (dp *DataPack) Pack(msg ziface.Imessage) ([]byte, error) {
 
 	databuf := bytes.NewBuffer([]byte{})
 
@@ -50,7 +50,7 @@ func (dp *DataPack) Pack(msg izface.Imessage) ([]byte, error) {
 
 }
 
-func (dp *DataPack) UnPack(binData []byte) (izface.Imessage, error) {
+func (dp *DataPack) UnPack(binData []byte) (ziface.Imessage, error) {
 
 	dataBuf := bytes.NewReader(binData)
 
