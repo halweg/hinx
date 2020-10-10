@@ -1,3 +1,13 @@
-# hinx
-Golang TCP 框架
+# <img width="80px" src="https://s2.ax1x.com/2019/10/09/u4yHo9.png" /> 
+
+Zinx 是一个基于Golang的轻量级并发服务器框架,
+原 repo 見: https://github.com/aceld/zinx，
+
+
+
+> **说明**:
+>計劃抄寫+改寫
+
+
+---
 
