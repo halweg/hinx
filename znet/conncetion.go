@@ -18,7 +18,7 @@ type Connection struct {
 
 	ExitChan chan bool
 
-	//Router ziface.IRouter
+	msgChan chan []byte
 
 	MsgHandler ziface.IMsgHandler
 }
@@ -30,17 +30,6 @@ func (c *Connection) StartReader() {
 	defer c.Stop()
 
 	for {
-		/*buf := make([]byte, utils.GlobalObject.MaxPackageSize)
-		_, err := c.Connection.Read(buf)
-		if err != nil {
-			fmt.Println("recv buf err ", err)
-			continue
-		}*/
-
-		/*if err := c.HandleAPI(c.Connection, buf, cnt); err != nil {
-			fmt.Println("connid ", c.ConnectionID, "handler error", err)
-			break
-		}*/
 
 		dp := NewDadaPack()
 
@@ -65,6 +54,7 @@ func (c *Connection) StartReader() {
 				break
 			}
 		}
+
 		msg.SetMessageData(data)
 
 		//读取客户端的 msg 头 二进制流的前8个字节
@@ -80,8 +70,26 @@ func (c *Connection) StartReader() {
 		
 		go c.MsgHandler.DoMessageHandler(&req)
 
-
 	}
+}
+
+func (c *Connection) StartWrite() {
+
+    fmt.Println("write is starting :" , c.Connection.RemoteAddr().String())
+    defer fmt.Println("write is closing : ", c.Connection.RemoteAddr().String())
+
+    for {
+        select {
+        case data := <-c.msgChan :
+            if _, err := c.Connection.Write(data); err != nil {
+                fmt.Println("startWrite err :", err)
+                return
+            }
+        case <-c.ExitChan :
+            return
+        }
+    }
+
 }
 
 //把要发给客户端的消息先封包再发送
@@ -99,10 +107,7 @@ func (c *Connection) SendMsg(messageID uint32, data []byte) error {
 		return errors.New("pack error msg")
 	}
 
-	if _, err := c.Connection.Write(binMsg); err != nil {
-		fmt.Println("write msg id ", messageID, " is error")
-		return errors.New("conn write msg error")
-	}
+	c.msgChan <- binMsg
 
 	return nil
 
@@ -114,7 +119,7 @@ func (c *Connection) Start() {
 
 	go c.StartReader()
 
-
+    go c.StartWrite()
 	//TODO 启动从当前连接写数据的业务
 }
 
@@ -128,8 +133,9 @@ func (c *Connection) Stop() {
 	c.isClose = true
 
 	c.Connection.Close()
-
+    c.ExitChan <- true
 	close(c.ExitChan)
+	close(c.msgChan)
 }
 
 func (c *Connection) GetTCPConnection() *net.TCPConn {
@@ -155,6 +161,7 @@ func NewConnection(connection *net.TCPConn, connectionID uint32,  handler ziface
 		Connection:   connection,
 		ConnectionID: connectionID,
 		isClose:      false,
+		msgChan:      make(chan []byte),
 		ExitChan:     make(chan bool, 1),
 		MsgHandler:   handler,
 	}
