@@ -8,6 +8,8 @@ import (
 
 type MsgHandler struct {
     Apis map[uint32]ziface.IRouter
+    WorkerPoolSize uint32                    //业务工作Worker池的数量
+    TaskQueue      []chan ziface.IRequest    //Worker负责取任务的消息队列
 }
 
 func (m *MsgHandler) DoMessageHandler(req ziface.IRequest) {
