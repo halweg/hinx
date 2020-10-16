@@ -1,11 +1,12 @@
 package znet
 
 import (
-	"errors"
-	"fmt"
-	"io"
-	"net"
-	"zinx/ziface"
+    "errors"
+    "fmt"
+    "io"
+    "net"
+    "zinx/utils"
+    "zinx/ziface"
 )
 
 type Connection struct {
@@ -67,9 +68,12 @@ func (c *Connection) StartReader() {
 			Conn: c,
 			msg: msg,
 		}
-		
-		go c.MsgHandler.DoMessageHandler(&req)
 
+		if utils.GlobalObject.WorkerPoolSize > 0 {
+		    c.MsgHandler.SendMsgToTasKQueue(&req)
+        } else {
+            go c.MsgHandler.DoMessageHandler(&req)
+        }
 	}
 }
 
