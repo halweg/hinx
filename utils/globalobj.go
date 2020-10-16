@@ -24,6 +24,12 @@ type  GlobalObj struct {
 	MaxConn int
 	MaxPackageSize uint32
 
+	WorkerPoolSize uint32
+
+	MaxWorkerPoolSize uint32
+
+    MaxWorkerTaskLen uint32
+
 }
 
 func (g *GlobalObj) Reload () {
@@ -50,6 +56,8 @@ func init() {
 		TcpPort: "8999",
 		MaxConn: 1000,
 		MaxPackageSize: 4096,
+		WorkerPoolSize: 16,
+        MaxWorkerTaskLen: 1024,
 	}
 
 	GlobalObject.Reload()

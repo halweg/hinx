@@ -48,6 +48,8 @@ func (s *Server) Start() {
 
 	go func() {
 
+	    s.MsgHandler.StartWorkerPool()
+	    
 		addr, err := net.ResolveTCPAddr(s.IPVersion, fmt.Sprintf("%s:%s", s.IP, s.port))
 
 		if err != nil {
