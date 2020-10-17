@@ -8,5 +8,8 @@ type IServer interface {
 	Server()
 
 	AddRouter(msgID uint32, router IRouter)
+
+    GetConnManager () IConnManager
+
 }
 

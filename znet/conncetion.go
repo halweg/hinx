@@ -10,22 +10,23 @@ import (
 )
 
 type Connection struct {
+    TCPServer ziface.IServer
 
-	Connection *net.TCPConn
+    Connection *net.TCPConn
 
-	ConnectionID uint32
+    ConnectionID uint32
 
-	isClose bool
+    isClose bool
 
-	ExitChan chan bool
+    ExitChan chan bool
 
-	msgChan chan []byte
+    msgChan chan []byte
 
-	MsgHandler ziface.IMsgHandler
+    MsgHandler  ziface.IMsgHandler
 }
 
 func (c *Connection) StartReader() {
-	fmt.Println("reader 读业务启动中.....")
+	fmt.Println("reader is running.....")
 	defer fmt.Println("connID=", c.ConnectionID, "Reader IS " +
 		"exit, remote addr is ", c.RemoteAddr().String())
 	defer c.Stop()
@@ -37,13 +38,13 @@ func (c *Connection) StartReader() {
 		headData := make([]byte, dp.GetHeadLen())
 		if _, err :=  io.ReadFull(c.GetTCPConnection(), headData); err != nil {
 			fmt.Println("read msg head err\n", err)
-			break
+            return
 		}
 
 		msg,  err := dp.UnPack(headData)
 		if err != nil {
 			fmt.Println("unpack err \n", err)
-			break
+            return
 		}
 
 		var data []byte
@@ -52,7 +53,7 @@ func (c *Connection) StartReader() {
 
 			if _, err := io.ReadFull(c.GetTCPConnection(), data); err != nil {
 				fmt.Println("read msg data err", err)
-				break
+                return
 			}
 		}
 
@@ -129,7 +130,7 @@ func (c *Connection) Start() {
 
 
 func (c *Connection) Stop() {
-	fmt.Printf("coonID 为 %d 的连接正在关闭中......", c.ConnectionID)
+	fmt.Printf("coonID 为 %d 的连接正在关闭中......\n", c.ConnectionID)
 	if c.isClose == true {
 		return
 	}
@@ -138,6 +139,9 @@ func (c *Connection) Stop() {
 
 	c.Connection.Close()
     c.ExitChan <- true
+
+    c.TCPServer.GetConnManager().Remove(c)
+
 	close(c.ExitChan)
 	close(c.msgChan)
 }
@@ -159,9 +163,11 @@ func (c *Connection) Send([]byte) error {
 	return nil
 }
 
-func NewConnection(connection *net.TCPConn, connectionID uint32,  handler ziface.IMsgHandler) *Connection {
+
+func NewConnection(s ziface.IServer,connection *net.TCPConn, connectionID uint32,  handler ziface.IMsgHandler) *Connection {
 
 	c := &Connection{
+	    TCPServer:s,
 		Connection:   connection,
 		ConnectionID: connectionID,
 		isClose:      false,
@@ -169,6 +175,8 @@ func NewConnection(connection *net.TCPConn, connectionID uint32,  handler ziface
 		ExitChan:     make(chan bool, 1),
 		MsgHandler:   handler,
 	}
+
+	c.TCPServer.GetConnManager().Add(c)
 
 	return c
 }

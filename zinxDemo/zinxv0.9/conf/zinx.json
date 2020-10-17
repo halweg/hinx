@@ -1,0 +1,8 @@
+{
+  "Name" : "demo server",
+  "Host" : "127.0.0.1",
+  "TcpPort" : "8999",
+  "MaxConn" : 1,
+  "MaxPackageSize" : 4096,
+  "WorkerPoolSize" : 2
+}

@@ -19,6 +19,8 @@ type Server struct {
 
     MsgHandler ziface.IMsgHandler
 
+	ConnManager ziface.IConnManager
+
 }
 
 func (s *Server) AddRouter(msgID uint32, router ziface.IRouter) {
@@ -66,13 +68,23 @@ func (s *Server) Start() {
 		cid = 0
 		for  {
 			conn, err := listener.AcceptTCP()
+
 			if err != nil {
 				fmt.Println(err)
 				continue
 			}
-			dealConnection := NewConnection(conn, cid, s.MsgHandler)
+
+
+            if s.ConnManager.Len() >= utils.GlobalObject.MaxConn {
+                fmt.Println("===========================to many conn.....===============================")
+                conn.Close()
+                continue
+            }
+
+
+            dealConnection := NewConnection(s ,conn, cid, s.MsgHandler)
 			cid ++
-			go dealConnection.Start()
+            go dealConnection.Start()
 		}
 
 	}()
@@ -83,7 +95,8 @@ func (s *Server) Start() {
 }
 
 func (s *Server) Stop() {
-
+    fmt.Println("server is stopping...")
+    s.ConnManager.ClearConn()
 }
 
 func (s *Server) Server() {
@@ -94,12 +107,18 @@ func (s *Server) Server() {
 	select {}
 }
 
+
+func (s *Server) GetConnManager () ziface.IConnManager {
+    return s.ConnManager
+}
+
 func NewZinxServer(name string) ziface.IServer {
 	return &Server{
 		Name: utils.GlobalObject.Name,
-		IP:        utils.GlobalObject.Host,
+		IP: utils.GlobalObject.Host,
 		IPVersion: "tcp4",
-		port:      utils.GlobalObject.TcpPort,
+		port: utils.GlobalObject.TcpPort,
 		MsgHandler: newMsgHandler(),
+        ConnManager: NewConnManager(),
 	}
 }
