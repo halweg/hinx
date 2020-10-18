@@ -26,8 +26,8 @@ type Connection struct {
 }
 
 func (c *Connection) StartReader() {
-	fmt.Println("reader is running.....")
-	defer fmt.Println("connID=", c.ConnectionID, "Reader IS " +
+	fmt.Println("Conn  StartReader() is running.....")
+	defer fmt.Println("connID = " , c.ConnectionID, "StartReader() IS " +
 		"exit, remote addr is ", c.RemoteAddr().String())
 	defer c.Stop()
 
@@ -80,14 +80,14 @@ func (c *Connection) StartReader() {
 
 func (c *Connection) StartWrite() {
 
-    fmt.Println("write is starting :" , c.Connection.RemoteAddr().String())
-    defer fmt.Println("write is closing : ", c.Connection.RemoteAddr().String())
+    fmt.Println("Conn StartWrite() :" , c.Connection.RemoteAddr().String())
+    defer fmt.Println("Conn StartWrite() close : ", c.Connection.RemoteAddr().String())
 
     for {
         select {
         case data := <-c.msgChan :
             if _, err := c.Connection.Write(data); err != nil {
-                fmt.Println("startWrite err :", err)
+                fmt.Println("Conn StartWrite() err :", err)
                 return
             }
         case <-c.ExitChan :
@@ -120,22 +120,27 @@ func (c *Connection) SendMsg(messageID uint32, data []byte) error {
 
 func (c *Connection) Start() {
 
-	fmt.Println("Connection creating...... connctionID = ", c.ConnectionID)
+	fmt.Println("Conn Start()...... connID = ", c.ConnectionID)
 
 	go c.StartReader()
 
     go c.StartWrite()
-	//TODO 启动从当前连接写数据的业务
+
+	//调用hook
+    c.TCPServer.CallOnnStart(c)
 }
 
 
 func (c *Connection) Stop() {
-	fmt.Printf("coonID 为 %d 的连接正在关闭中......\n", c.ConnectionID)
+	fmt.Println("Conn Stop()...... connID =", c.ConnectionID)
 	if c.isClose == true {
 		return
 	}
 
 	c.isClose = true
+
+	//调用hook
+	c.TCPServer.CallOnConnStop(c)
 
 	c.Connection.Close()
     c.ExitChan <- true

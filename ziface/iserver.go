@@ -11,5 +11,13 @@ type IServer interface {
 
     GetConnManager () IConnManager
 
+    SetOnConnStart (func(conn IConnection))
+
+    SetOnConnStop (func(conn IConnection))
+
+    CallOnnStart (conn IConnection)
+
+    CallOnConnStop (conn IConnection)
+
 }
 

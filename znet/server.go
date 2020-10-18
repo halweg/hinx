@@ -21,6 +21,9 @@ type Server struct {
 
 	ConnManager ziface.IConnManager
 
+    OnConnStart func(connection ziface.IConnection)
+
+	OnConnStop  func(connection ziface.IConnection)
 }
 
 func (s *Server) AddRouter(msgID uint32, router ziface.IRouter) {
@@ -74,13 +77,11 @@ func (s *Server) Start() {
 				continue
 			}
 
-
             if s.ConnManager.Len() >= utils.GlobalObject.MaxConn {
                 fmt.Println("===========================to many conn.....===============================")
                 conn.Close()
                 continue
             }
-
 
             dealConnection := NewConnection(s ,conn, cid, s.MsgHandler)
 			cid ++
@@ -88,9 +89,6 @@ func (s *Server) Start() {
 		}
 
 	}()
-
-
-
 
 }
 
@@ -121,4 +119,27 @@ func NewZinxServer(name string) ziface.IServer {
 		MsgHandler: newMsgHandler(),
         ConnManager: NewConnManager(),
 	}
+}
+
+
+func (s *Server) SetOnConnStart (hookFunc func(conn ziface.IConnection)) {
+    s.OnConnStart = hookFunc
+}
+
+func (s *Server) SetOnConnStop (hookFunc func(conn ziface.IConnection)) {
+    s.OnConnStop = hookFunc
+}
+
+func (s *Server) CallOnnStart (conn ziface.IConnection) {
+    if s.OnConnStart != nil {
+        fmt.Println("----->call OnConnStart()")
+        s.OnConnStart(conn)
+    }
+}
+
+func (s *Server) CallOnConnStop (conn ziface.IConnection) {
+    if s.OnConnStop != nil {
+        fmt.Println("----->call OnConnStop()")
+        s.OnConnStop(conn)
+    }
 }

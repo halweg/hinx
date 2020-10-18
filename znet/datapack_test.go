@@ -55,7 +55,7 @@ func TestDataPack(t *testing.T)  {
 							return
 						}
 
-						fmt.Println("---->Recv MsgId:", msg.Id, ",datalen= ", msg.DataLen,
+						fmt.Println("---->Recv MsgId:", msg.Id, ",dataLen = ", msg.DataLen,
 							",data=", string(msg.Data))
 
 

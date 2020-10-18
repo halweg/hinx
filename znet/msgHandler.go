@@ -48,7 +48,7 @@ func (m *MsgHandler) StartWorkerPool() {
 }
 
 func (m *MsgHandler) StartOneWorker(workerID int, queue chan ziface.IRequest) {
-    fmt.Println("worker ", workerID, "is starting...")
+    fmt.Println("MsgHandler StartOneWorker() running...,  WorkerID is ", workerID)
     for {
         select {
         case re := <-queue:
@@ -59,7 +59,7 @@ func (m *MsgHandler) StartOneWorker(workerID int, queue chan ziface.IRequest) {
 
 func (m *MsgHandler) SendMsgToTasKQueue(re ziface.IRequest) {
     workerID := re.GetConnection().GetConnectID() % utils.GlobalObject.WorkerPoolSize
-    fmt.Println("connID : ", re.GetConnection().GetConnectID(), " send Request to Worker : ", workerID)
+    fmt.Println("connID : ", re.GetConnection().GetConnectID(), " SendMsgToTasKQueue() to TaskQueue, workerID = ", workerID)
     m.TaskQueue[workerID] <- re
 }
 
