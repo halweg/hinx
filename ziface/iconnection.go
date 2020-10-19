@@ -17,6 +17,11 @@ type IConnection interface {
 
 	SendMsg(msgID uint32, data []byte) error
 
+    SetProperty(key string, v interface{})
+
+	GetProperty(key string) (interface{}, error)
+
+    RemoveProperty(key string)
 }
 
 type HandlerFunc func(*net.TCPConn, []byte, int) error

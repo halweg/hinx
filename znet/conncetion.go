@@ -5,6 +5,7 @@ import (
     "fmt"
     "io"
     "net"
+    "sync"
     "zinx/utils"
     "zinx/ziface"
 )
@@ -23,6 +24,11 @@ type Connection struct {
     msgChan chan []byte
 
     MsgHandler  ziface.IMsgHandler
+
+    //用户自定义连接属性
+    Property map[string]interface{}
+
+    PropertyLock sync.RWMutex
 }
 
 func (c *Connection) StartReader() {
@@ -168,6 +174,32 @@ func (c *Connection) Send([]byte) error {
 	return nil
 }
 
+func (c *Connection) SetProperty(key string, v interface{}) {
+    c.PropertyLock.Lock()
+    defer c.PropertyLock.Unlock()
+    c.Property[key] = v
+}
+
+func (c *Connection) GetProperty(key string) (interface{}, error) {
+    c.PropertyLock.RLock()
+    defer c.PropertyLock.RUnlock()
+
+    if v , e := c.Property[key]; e {
+        return v, nil
+    }
+
+    fmt.Println("property ", key, "not found!")
+    return nil, errors.New("property "+key+" not found!")
+
+}
+
+func (c *Connection) RemoveProperty(key string) {
+    c.PropertyLock.Lock()
+    defer c.PropertyLock.Unlock()
+
+    delete(c.Property, key)
+}
+
 
 func NewConnection(s ziface.IServer,connection *net.TCPConn, connectionID uint32,  handler ziface.IMsgHandler) *Connection {
 
@@ -179,6 +211,7 @@ func NewConnection(s ziface.IServer,connection *net.TCPConn, connectionID uint32
 		msgChan:      make(chan []byte),
 		ExitChan:     make(chan bool, 1),
 		MsgHandler:   handler,
+		Property:     make(map[string]interface{}),
 	}
 
 	c.TCPServer.GetConnManager().Add(c)
