@@ -30,7 +30,7 @@ func HookBeforeConn(conn ziface.IConnection) {
     if err := conn.SendMsg(202, []byte("hello welcome call HookFunc on conn start\n")); err!= nil{
         fmt.Println(err)
     }
-    
+
     conn.SetProperty("github", "https://github.com/halweg")
 }
 
@@ -43,7 +43,7 @@ func HookAfterConn(conn ziface.IConnection) {
 
 func main() {
 
-	s := znet.NewZinxServer("[zinx0.9.1]")
+	s := znet.NewZinxServer("[zinx0.10]")
 
 	s.SetOnConnStart(HookBeforeConn)
 	s.SetOnConnStop(HookAfterConn)
